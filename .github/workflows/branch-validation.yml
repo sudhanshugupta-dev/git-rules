@@ -1,19 +1,19 @@
 name: Branch Name Validation
 on:
-    workflow_call:
+  workflow_call:
 
 jobs:
-    branch_check:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Validate branch naming convention
-              if: ${{ github.head_ref != '' }}
-              run: |
-                  BRANCH_NAME="${{ github.head_ref }}"
-                  echo "🔍 Checking branch name: $BRANCH_NAME"
-                  if [[ ! "$BRANCH_NAME" =~ ^feature\/[a-zA-Z0-9._-]+$ ]]; then
-                    echo "❌ Invalid branch name: '$BRANCH_NAME'"
-                    echo "Branch names must start with 'feature/' (e.g., feature/login-screen)"
-                    exit 1
-                  fi
-                  echo "✅ Branch name is valid"
+  branch_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch naming convention
+        if: ${{ github.head_ref != '' }}
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "🔍 Checking branch name: $BRANCH_NAME"
+          if [[ ! "$BRANCH_NAME" =~ ^feature\/[a-zA-Z0-9._-]+$ ]]; then
+            echo "❌ Invalid branch name: '$BRANCH_NAME'"
+            echo "Branch names must start with 'feature/' (e.g., feature/login-screen)"
+            exit 1
+          fi
+          echo "✅ Branch name is valid"
