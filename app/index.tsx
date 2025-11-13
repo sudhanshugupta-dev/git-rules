@@ -65,7 +65,7 @@ const App: React.FC = () => {
           >
             <Text style={styles.welcomeTitle}>Welcome!</Text>
             <Text style={styles.welcomeSubtitle}>
-              We're thrilled to have you here!
+              We are thrilled to have you here!
             </Text>
             <Text style={styles.welcomeMessage}>
               Explore amazing features{'\n'}and enjoy a seamless experience.

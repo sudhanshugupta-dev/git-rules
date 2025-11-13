@@ -44,4 +44,18 @@ describe('App Component', () => {
       expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
     });
   });
+
+  it('closes modal on backdrop press (via onRequestClose)', async () => {
+    const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
+    fireEvent.press(getByTestId('open-modal-button'));
+
+    await waitFor(() => expect(getByTestId('modal-overlay')).toBeTruthy());
+
+    // Simulate backdrop press
+    fireEvent(getByTestId('modal-overlay'), 'press');
+
+    await waitFor(() => {
+      expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
+    });
+  });
 });
