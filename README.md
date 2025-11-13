@@ -1,2 +1,3 @@
 # git-rules
-Goal of POC 
+
+Goal of POC
