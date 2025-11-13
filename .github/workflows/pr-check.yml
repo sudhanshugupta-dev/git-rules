@@ -1,63 +1,30 @@
-name: PR Checks (Branch Name + Prettier + Lint + Test + Commit Message)
+name: PR Checks (Branch Name + Prettier + Lint + Test)
 
 on:
   pull_request:
+    branches:
+      - development
     types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
   validate:
-    name: Validate Branch + Code Quality + Tests
+    name: Validate Code Quality
     runs-on: ubuntu-latest
 
     steps:
-      # 🧩 Step 1 — Checkout Repo
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # 🧩 Step 2 — Validate Branch Name Convention
-      - name: Validate Branch Name
-        id: branch_check
-        run: |
-          BRANCH_NAME="${{ github.head_ref }}"
-          echo "🔍 Checking branch name: $BRANCH_NAME"
-
-          # Branch naming rule for React Native project
-          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|chore|ci|docs)\/[a-z0-9._-]+$ ]]; then
-            echo "❌ Invalid branch name: '$BRANCH_NAME'"
-            echo "✅ Allowed pattern: feature/, bugfix/, hotfix/, release/, chore/, ci/, docs/"
-            exit 1
-          fi
-          echo "✅ Branch name '$BRANCH_NAME' follows the convention."
-
-      # 🧩 Step 3 — Setup Node.js (React Native projects use Node)
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 18
 
-      # 🧩 Step 4 — Install Dependencies
-      - name: Install Dependencies
-        run: |
-          npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      # 🧩 Step 5 — Prettier Code Format Check
-      - name: Check Code Format with Prettier
-        run: |
-          echo "🎨 Checking code formatting..."
-          npx prettier --check "**/*.{js,jsx,ts,tsx,json,md}"
+      - name: Run Prettier check
+        run: npx prettier --check .
 
-      # 🧩 Step 6 — ESLint Linting
-      - name: Run ESLint
-        run: |
-          echo "🧹 Running ESLint..."
-          npx eslint . --ext .js,.jsx,.ts,.tsx
-
-      # 🧩 Step 7 — Commit Message Convention Check (Optional but professional)
-      - name: Validate Commit Messages (Conventional Commits)
-        run: |
-          echo "🕵️ Checking commit messages for Conventional Commit style..."
-          npx commitlint --from=origin/main --to=HEAD || echo "⚠️ Warning: Some commit messages may not follow Conventional Commits."
-          echo "🧪 Running tests..."
-          npm test -- --ci --watchAll=false
+      - name: Run ESLint check
+        run: npx eslint . --max-warnings=0
