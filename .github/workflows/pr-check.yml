@@ -1,45 +1,19 @@
-name: PR Checks (Branch Name + Prettier + Lint + Test)
+name: PR Checks (Branch Name + Lint + Prettier + Test + Sonar)
 
 on:
-  pull_request:
-    branches:
-      - development
-    types: [opened, reopened, synchronize, ready_for_review]
+    pull_request:
+        branches:
+            - development
+        types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  validate:
-    name: Validate Branch + Code Quality
-    runs-on: ubuntu-latest
+    branch_check:
+        uses: ./.github/workflows/branch-validation.yml
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    prettier_check:
+        needs: branch_check
+        uses: ./.github/workflows/pret-tier.yml
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci || npm install
-
-      # ✅ Check branch name format
-      - name: Validate branch naming convention
-        if: ${{ github.head_ref != '' }}
-        run: |
-          BRANCH_NAME="${{ github.head_ref }}"
-          echo "Checking branch name: $BRANCH_NAME"
-          if [[ ! "$BRANCH_NAME" =~ ^feature\/[a-zA-Z0-9._-]+$ ]]; then
-            echo "❌ Invalid branch name: '$BRANCH_NAME'"
-            echo "Branch names must start with 'feature/' (e.g., feature/login-screen)"
-            exit 1
-          fi
-          echo "✅ Branch name is valid"
-
-      # ✅ Prettier check
-      - name: Run Prettier check
-        run: npx prettier --check .
-
-      # ✅ ESLint check
-      - name: Run ESLint check
-        run: npx eslint . --max-warnings=0
+    eslint_check:
+        needs: prettier_check
+        uses: ./.github/workflows/es-lint.yml
