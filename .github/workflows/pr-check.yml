@@ -17,3 +17,7 @@ jobs:
   eslint_check:
     needs: prettier_check
     uses: ./.github/workflows/es-lint.yml
+
+  test_check:
+    needs: eslint_check
+    uses: ./.github/workflows/test.yml
