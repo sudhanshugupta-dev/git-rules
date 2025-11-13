@@ -1,4 +1,4 @@
-name: PR Checks (Branch Name + Lint + Prettier + Test + Sonar)
+name: PR Checks
 
 on:
   pull_request:
