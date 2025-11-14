@@ -1,16 +1,16 @@
 
 
-# echo "🔍 Running ESLint and Prettier before commit..."
+echo "🔍 Running ESLint and Prettier before commit..."
 
-# # Run lint check
-# npx eslint . --max-warnings=0
+# Run lint check
+npx eslint . --max-warnings=0
 
-# # Run Prettier check
-# npx prettier --check .
+# Run Prettier check
+npx prettier --check .
 
-# if [ $? -ne 0 ]; then
-#   echo "❌ Lint or Prettier issues found. Please fix them before committing."
-#   exit 1
-# fi
+if [ $? -ne 0 ]; then
+  echo "❌ Lint or Prettier issues found. Please fix them before committing."
+  exit 1
+fi
 
-# echo "✅ Code is clean. Proceeding with commit."
+echo "✅ Code is clean. Proceeding with commit."
