@@ -1,6 +1,5 @@
 name: prettier_check
 
-
 on:
   workflow_call:
 
