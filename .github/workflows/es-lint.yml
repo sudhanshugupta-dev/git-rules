@@ -1,9 +1,9 @@
 name: eslint_check
 
+
 on:
-  pull_request:
-    branches:
-      - development
+  workflow_call:
+
 
 jobs:
   lint_check:
