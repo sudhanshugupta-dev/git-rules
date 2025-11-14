@@ -63,7 +63,7 @@ const App: React.FC = () => {
             ]}
             testID="modal-content"
           >
-            <Text style={styles.welcomeTitle}>Welcome!</Text>
+            <Text style={styles.welcomeTitle}>Welcom!</Text>
             <Text style={styles.welcomeSubtitle}>
               We are thrilled to have you here!
             </Text>
