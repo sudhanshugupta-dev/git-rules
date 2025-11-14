@@ -1,21 +1,19 @@
-name: ESLint Check
+name: eslint_check
+
 on:
-  workflow_call:
+  pull_request:
+    branches:
+      - development
 
 jobs:
   lint_check:
+    name: eslint_check
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Install dependencies
-        run: npm ci || npm install
-
-      - name: Run ESLint check
-        run: npx eslint . --max-warnings=0
+      - run: npm ci
+      - run: npx eslint . --max-warnings=0
