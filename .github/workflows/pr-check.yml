@@ -20,4 +20,4 @@ jobs:
 
   test_check:
     needs: eslint_check
-    uses: ./.github/workflows/test.yml
+    uses: ./.github/workflows/jest-test.yml
