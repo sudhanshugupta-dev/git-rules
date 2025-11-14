@@ -1,4 +1,4 @@
-name: ESLint Check
+name: eslint_check
 on:
   workflow_call:
 

@@ -1,9 +1,9 @@
-name: Unit Tests
+name: prettier_check
 on:
   workflow_call:
 
 jobs:
-  test_check:
+  prettier_check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -17,7 +17,5 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Run Unit Tests
-        run: |
-          echo "🧪 Running unit tests..."
-          npm test -- --ci --reporters=default
+      - name: Run Prettier check
+        run: npx prettier --check .
