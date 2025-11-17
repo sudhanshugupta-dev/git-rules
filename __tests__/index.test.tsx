@@ -22,15 +22,25 @@ describe('App Component', () => {
   });
 
   it('closes modal when Get Started is pressed', async () => {
-    const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
+    const { getByTestId, queryByText } = render(<App />);
+
+    // Open modal
     fireEvent.press(getByTestId('open-modal-button'));
 
-    await waitFor(() => expect(getByTestId('get-started-button')).toBeTruthy());
+    // Wait until modal is visible
+    await waitFor(() => {
+      expect(getByTestId('get-started-button')).toBeTruthy();
+    });
 
+    // Press get started
     fireEvent.press(getByTestId('get-started-button'));
 
+    // Fast-forward timers (fix CI delay)
+    jest.runAllTimers();
+
+    // Modal should close
     await waitFor(() => {
-      expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
+      expect(queryByText('Welcome!')).toBeNull();
     });
   });
 
