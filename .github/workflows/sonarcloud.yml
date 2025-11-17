@@ -1,0 +1,30 @@
+name: SonarCloudScan
+
+on:
+  workflow_call:
+
+jobs:
+  sonarcloud:
+    name: SonarCloud_Quality_Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Important for accurate analysis
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run Tests with Coverage
+        run: npm test -- --coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2@925c6ffc8d1472a5d9dd90bf44a5708ed47ac44e
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
