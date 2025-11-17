@@ -10,16 +10,16 @@ describe('App Component', () => {
     expect(getByText('Open Welcome Modal')).toBeTruthy();
   });
 
-  it('opens modal when button is pressed', async () => {
-    const { getByTestId, getByText } = render(<App />);
-    const openButton = getByTestId('open-modal-button');
+  // it('opens modal when button is pressed', async () => {
+  //   const { getByTestId, getByText } = render(<App />);
+  //   const openButton = getByTestId('open-modal-button');
 
-    fireEvent.press(openButton);
+  //   fireEvent.press(openButton);
 
-    await waitFor(() => {
-      expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
-    });
-  });
+  //   await waitFor(() => {
+  //     expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
+  //   });
+  // });
 
   it('closes modal when Get Started is pressed', async () => {
     const { getByTestId, queryByText } = render(<App />);
@@ -44,17 +44,17 @@ describe('App Component', () => {
     });
   });
 
-  // it('closes modal on backdrop press (via onRequestClose)', async () => {
-  //   const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
-  //   fireEvent.press(getByTestId('open-modal-button'));
+  it('closes modal on backdrop press (via onRequestClose)', async () => {
+    const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
+    fireEvent.press(getByTestId('open-modal-button'));
 
-  //   await waitFor(() => expect(getByTestId('modal-overlay')).toBeTruthy());
+    await waitFor(() => expect(getByTestId('modal-overlay')).toBeTruthy());
 
-  //   // Simulate backdrop press
-  //   fireEvent(getByTestId('modal-overlay'), 'press');
+    // Simulate backdrop press
+    fireEvent(getByTestId('modal-overlay'), 'press');
 
-  //   await waitFor(() => {
-  //     expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
-  //   });
-  // });
+    await waitFor(() => {
+      expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
+    });
+  });
 });
