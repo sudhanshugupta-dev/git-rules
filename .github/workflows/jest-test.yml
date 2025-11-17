@@ -1,9 +1,7 @@
 name: jest_test
 
-
 on:
   workflow_call:
-
 
 jobs:
   jest_test:

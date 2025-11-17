@@ -1,9 +1,7 @@
 name: eslint_check
 
-
 on:
   workflow_call:
-
 
 jobs:
   lint_check:

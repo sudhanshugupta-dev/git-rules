@@ -1,9 +1,7 @@
 name: branch_validation
 
-
 on:
   workflow_call:
-
 
 jobs:
   branch_validation:
@@ -18,5 +16,3 @@ jobs:
             echo "❌ Invalid branch name $BRANCH"
             exit 1
           fi
-
-
