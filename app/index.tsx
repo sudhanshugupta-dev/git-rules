@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Modal,
   StyleSheet,
-  RecursiveArray,
   Animated,
   Dimensions,
 } from 'react-native';
