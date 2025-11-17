@@ -21,3 +21,6 @@ jobs:
   test_check:
     needs: eslint_check
     uses: ./.github/workflows/jest-test.yml
+
+  Commit_Check_messages:
+    uses: ./.github/workflows/commit-message-check.yml

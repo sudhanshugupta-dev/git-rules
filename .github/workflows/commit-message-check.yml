@@ -1,42 +1,42 @@
 name: Commit_Check_messages
 
 on:
-  workflow_call:
+    workflow_call:
 
 jobs:
-  Commit_Check_messsages:
-    name: Checkout_code
-    runs-on: ubuntu-latest
+    Commit_Check_messsages:
+        name: Commit_Check_messages
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Allows reading all commit messages
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Allows reading all commit messages
 
-      - name: Validate commit messages
-        run: |
-          echo "Checking commit messages..."
+            - name: Validate commit messages
+              run: |
+                  echo "Checking commit messages..."
 
-          # Allowed prefixes
-          ALLOWED="^(add|update|delete|modify|fix|testing):"
+                  # Allowed prefixes
+                  ALLOWED="^(add|update|delete|modify|fix|testing):"
 
-          # Get all commit messages in the PR
-          git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" > commits.txt
+                  # Get all commit messages in the PR
+                  git log origin/${{ github.base_ref }}..HEAD --pretty=format:"%s" > commits.txt
 
-          echo "Commit messages found:"
-          cat commits.txt
-          echo "---------------------------"
+                  echo "Commit messages found:"
+                  cat commits.txt
+                  echo "---------------------------"
 
-          # Validate each commit
-          while IFS= read -r line
-          do
-            if ! [[ "$line" =~ $ALLOWED ]]; then
-              echo "❌ ERROR: Commit message does not start with required keyword:"
-              echo "    \"$line\""
-              echo ""
-              echo "Allowed prefixes: add:, update:, delete:, modify:, fix:, testing:"
-              exit 1
-            fi
-          done < commits.txt
+                  # Validate each commit
+                  while IFS= read -r line
+                  do
+                    if ! [[ "$line" =~ $ALLOWED ]]; then
+                      echo "❌ ERROR: Commit message does not start with required keyword:"
+                      echo "    \"$line\""
+                      echo ""
+                      echo "Allowed prefixes: add:, update:, delete:, modify:, fix:, testing:"
+                      exit 1
+                    fi
+                  done < commits.txt
 
-          echo "✅ All commit messages are valid"
+                  echo "✅ All commit messages are valid"
