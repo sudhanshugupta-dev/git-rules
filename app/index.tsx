@@ -76,7 +76,9 @@ const App: React.FC = () => {
               onPress={closeModal}
               testID="get-started-button"
             >
-              <Text style={styles.closeButtonText}>Get Started</Text>
+              <Text style={styles.closeButtonText}>
+                Get Started from the New World
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
