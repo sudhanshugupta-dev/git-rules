@@ -47,7 +47,6 @@ const App: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Welcome Modal */}
       <Modal
         transparent
         visible={modalVisible}
