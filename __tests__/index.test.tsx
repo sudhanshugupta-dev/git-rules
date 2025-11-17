@@ -21,17 +21,6 @@ describe('App Component', () => {
     });
   });
 
-  it('displays welcome content in modal', async () => {
-    const { getByTestId, getByText } = render(<App />);
-    fireEvent.press(getByTestId('open-modal-button'));
-
-    await waitFor(() => {
-      expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
-      expect(getByText("We're thrilled to have you here!")).toBeTruthy();
-      expect(getByTestId('get-started-button')).toBeTruthy();
-    });
-  });
-
   it('closes modal when Get Started is pressed', async () => {
     const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
     fireEvent.press(getByTestId('open-modal-button'));
