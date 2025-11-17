@@ -21,27 +21,26 @@ describe('App Component', () => {
   //   });
   // });
 
-  // it('displays welcome content in modal', async () => {
-  //   const { getByTestId, getByText } = render(<App />);
-  //   fireEvent.press(getByTestId('open-modal-button'));
-
-  //   await waitFor(() => {
-  //     expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
-  //     expect(getByText("We're thrilled to have you here!")).toBeTruthy();
-  //     expect(getByTestId('get-started-button')).toBeTruthy();
-  //   });
-  // });
-
   it('closes modal when Get Started is pressed', async () => {
-    const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
+    const { getByTestId, queryByText } = render(<App />);
+
+    // 1. Open modal
     fireEvent.press(getByTestId('open-modal-button'));
 
-    await waitFor(() => expect(getByTestId('get-started-button')).toBeTruthy());
+    // 2. Modal is now visible
+    await waitFor(() => {
+      expect(getByTestId('get-started-button')).toBeTruthy();
+    });
 
+    // 3. Press Get Started
     fireEvent.press(getByTestId('get-started-button'));
 
-    await waitFor(() => {
-      expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
+    // 4. Run pending timers (fix async modal closing)
+    jest.runAllTimers();
+
+    // 5. Wait for modal to close
+    await waitFor(() => expect(queryByText('Welcome!')).toBeNull(), {
+      timeout: 3000,
     });
   });
 
