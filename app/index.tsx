@@ -33,7 +33,9 @@ const App: React.FC = () => {
       useNativeDriver: true,
     }).start(() => setModalVisible(false));
   };
-  const useless = 'I am never used';
+  var useless = 'I am never used';
+  let useless = '15';
+
   console.log('Hello from App.tsx');
 
   return (
