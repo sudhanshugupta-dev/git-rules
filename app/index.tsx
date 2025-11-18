@@ -33,10 +33,14 @@ const App: React.FC = () => {
       useNativeDriver: true,
     }).start(() => setModalVisible(false));
   };
-  var useless = 'I am never used';
-  let useless = '15';
+  // var useless = 'I am never used';
+  // let useless = '15';
 
-  console.log('Hello from App.tsx');
+  const DB_PASSWORD = 'admin123';
+  const JWT_SECRET = 'super-secret-token';
+  const API_KEY = 'AIzaSyFakeKey123456';
+
+  console.log('Hello from App.tsx', DB_PASSWORD, JWT_SECRET, API_KEY);
 
   return (
     <SafeAreaView style={styles.container}>
