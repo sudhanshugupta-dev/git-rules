@@ -1,0 +1,17 @@
+name: prettier_check
+
+on:
+  workflow_call:
+
+jobs:
+  prettier_check:
+    name: prettier_check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npx prettier --check .
