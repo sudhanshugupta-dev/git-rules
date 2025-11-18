@@ -17,7 +17,7 @@ describe('App Component', () => {
     fireEvent.press(openButton);
 
     await waitFor(() => {
-      expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
+      expect(getByText('Welcome!')).toBeTruthy();
     });
   });
 

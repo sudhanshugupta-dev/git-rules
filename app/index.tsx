@@ -34,6 +34,12 @@ const App: React.FC = () => {
     }).start(() => setModalVisible(false));
   };
 
+  // const DB_PASSWORD = 'admin123';
+  // const JWT_SECRET = 'super-secret-token';
+  // const API_KEY = 'AIzaSyFakeKey123456';
+
+  // console.log('Hello from App.tsx', DB_PASSWORD, JWT_SECRET, API_KEY);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Main Screen */}
@@ -43,7 +49,7 @@ const App: React.FC = () => {
           onPress={openModal}
           testID="open-modal-button"
         >
-          <Text style={styles.openButtonText}>Open Welcome Modal</Text>
+          <Text style={styles.openButtonText}>Open Welcome Modal </Text>
         </TouchableOpacity>
       </View>
 
