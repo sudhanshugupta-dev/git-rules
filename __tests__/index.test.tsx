@@ -12,7 +12,7 @@ describe('App Component', () => {
 
   it('opens modal when button is pressed', async () => {
     const { getByTestId, getByText } = render(<App />);
-    const openButton = getByTestId('open-modal-button');
+    const openButton = getByTestId('open-modal-button ++++');
 
     fireEvent.press(openButton);
 
