@@ -34,6 +34,8 @@ const App: React.FC = () => {
     }).start(() => setModalVisible(false));
   };
 
+  console.log('Hello from App.tsx');
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Main Screen */}
