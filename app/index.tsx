@@ -43,7 +43,7 @@ const App: React.FC = () => {
           onPress={openModal}
           testID="open-modal-button"
         >
-          <Text style={styles.openButtonText}>Open Welcome Modal ++++</Text>
+          <Text style={styles.openButtonText}>Open Welcome Modal </Text>
         </TouchableOpacity>
       </View>
 

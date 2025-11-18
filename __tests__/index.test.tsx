@@ -12,12 +12,12 @@ describe('App Component', () => {
 
   it('opens modal when button is pressed', async () => {
     const { getByTestId, getByText } = render(<App />);
-    const openButton = getByTestId('open-modal-button ++++');
+    const openButton = getByTestId('open-modal-button');
 
     fireEvent.press(openButton);
 
     await waitFor(() => {
-      expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
+      expect(getByText('Welcome!')).toBeTruthy();
     });
   });
 
