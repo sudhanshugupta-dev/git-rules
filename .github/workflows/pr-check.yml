@@ -24,3 +24,6 @@ jobs:
 
   Commit_Check_messages:
     uses: ./.github/workflows/commit-message-check.yml
+
+  codeql_analysis:
+    uses: ./.github/workflows/codeql.yml
