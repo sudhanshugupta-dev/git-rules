@@ -42,7 +42,6 @@ const App: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Main Screen */}
       <View style={styles.centerContainer}>
         <TouchableOpacity
           style={styles.openButton}
