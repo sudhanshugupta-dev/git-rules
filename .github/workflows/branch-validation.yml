@@ -1,0 +1,18 @@
+name: branch_validation
+
+on:
+  workflow_call:
+
+jobs:
+  branch_validation:
+    name: branch_validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate branch name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          if [[ ! "$BRANCH" =~ ^feature\/[a-zA-Z0-9._-]+$ ]]; then
+            echo "❌ Invalid branch name $BRANCH"
+            exit 1
+          fi
