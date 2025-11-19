@@ -39,7 +39,9 @@ const App: React.FC = () => {
   // const API_KEY = 'AIzaSyFakeKey123456';
 
   // console.log('Hello from App.tsx', DB_PASSWORD, JWT_SECRET, API_KEY);
-  eval("console.log('test')");
+  const password = '123456';
+  const apiKey = 'AKIA1234567890EXAMPLE';
+  console.log(password, apiKey);
 
   return (
     <SafeAreaView style={styles.container}>
