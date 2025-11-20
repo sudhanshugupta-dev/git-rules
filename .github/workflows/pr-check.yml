@@ -11,16 +11,21 @@ jobs:
     uses: ./.github/workflows/branch-validation.yml
 
   prettier_check:
+    needs: branch_check
     uses: ./.github/workflows/pret-tier.yml
 
   eslint_check:
+    needs: prettier_check
     uses: ./.github/workflows/es-lint.yml
 
   test_check:
+    needs: eslint_check
     uses: ./.github/workflows/jest-test.yml
 
   Commit_Check_messages:
+    needs: test_check
     uses: ./.github/workflows/commit-message-check.yml
 
   codeql_analysis:
+    needs: test_check
     uses: ./.github/workflows/codeql.yml

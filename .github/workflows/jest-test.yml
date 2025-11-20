@@ -1,10 +1,8 @@
 name: jest_test
 
 on:
-  pull_request:
-    branches:
-      - development
-    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_call:
+
 jobs:
   jest_test:
     name: jest_test
@@ -12,8 +10,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+
       - run: npm ci
       - run: npm test -- --ci
+      - run: npm test -- --coverage
