@@ -1,4 +1,4 @@
-name: "codeql_analysis"
+name: 'codeql_analysis'
 
 # on:
 #   workflow_call:
