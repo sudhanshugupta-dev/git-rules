@@ -5,11 +5,10 @@ on:
         branches:
             - development
         types: [opened, reopened, synchronize, ready_for_review]
-
 jobs:
     build-android:
         runs-on: ubuntu-latest
-        environment: gitrules
+        environment: repo-rules
 
         steps:
             - name: Checkout repository
@@ -22,18 +21,16 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  npm install -g eas-cli
+                  npm install --global eas-cli
                   npm install
 
-            - name: EAS Login using Token
-              run: |
-                  echo $EXPO_TOKEN | eas login --token
+            - name: Log in to Expo with Token
+              run: eas whoami || eas login --non-interactive
               env:
                   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-            - name: Build Android APK
-              run: |
-                  eas build --platform android --profile preview --non-interactive
+            - name: Build Android (APK)
+              run: eas build --platform android --profile preview --non-interactive
               env:
                   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
