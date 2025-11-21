@@ -1,15 +1,12 @@
-name: Expo EAS Build + Firebase Testing
+name: EAS Build + Firebase Distribution
 
 on:
   pull_request:
-    branches:
-      - development
-    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [development]
 
 jobs:
-  build-and-test:
+  build-android:
     runs-on: ubuntu-latest
-    environment: gitrules
 
     steps:
       - name: Checkout repository
@@ -28,45 +25,39 @@ jobs:
       - name: Login to Expo
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas whoami || eas login --token "$EXPO_TOKEN" --non-interactive
+        run: |
+          eas login --token "$EXPO_TOKEN"
 
-      - name: Build Android (APK)
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build --platform android --profile preview --non-interactive
-
-      # ✅ FIXED — correct way to find latest build
-      - name: Get latest Android build ID
-        id: get-build
+      # FIXED — ensures JSON is written correctly
+      - name: Build APK using EAS
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
-          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          eas build --platform android --profile preview --non-interactive --json > build.json
+          echo "Build JSON created:"
+          cat build.json
 
-      # ✅ FIXED — correct command to download APK
-      - name: Download built artifact
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      # FIXED — correct JSON extraction (.id)
+      - name: Extract Build ID
         run: |
-          mkdir -p artifacts
-          eas build:download --id ${{ steps.get-build.outputs.build_id }} --path artifacts/
+          BUILD_ID=$(jq -r '.id' build.json)
+          echo "$BUILD_ID" > build_id.txt
+          echo "Extracted BUILD_ID: $BUILD_ID"
 
-      # FIXED — secrets safe inside env
-      - name: Set Firebase Credentials
-        env:
-          CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
+      # FIXED — correct download path, correct command
+      - name: Download Build Artifact
         run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT" > firebase.json
-          gcloud auth activate-service-account --key-file=firebase.json
-          gcloud config set project $(jq -r '.project_id' firebase.json)
+          BUILD_ID=$(cat build_id.txt)
+          echo "Downloading build: $BUILD_ID"
+          eas build:download --id "$BUILD_ID" --path app.apk
 
-      - name: Upload APK to Firebase App Distribution
+      # FIXED — Firebase upload (safe env usage)
+      - name: Upload to Firebase App Distribution
         env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
-          firebase appdistribution:distribute artifacts/*.apk \
+          firebase appdistribution:distribute app.apk \
             --app "$FIREBASE_APP_ID" \
-            --groups "qa-team" \
-            --release-notes "CI build from PR"
+            --groups "testers" \
+            --release-notes "Uploaded via GitHub Actions"
