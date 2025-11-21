@@ -1,12 +1,13 @@
-name: Expo EAS Build (Android)
+name: Expo EAS Build + Firebase Testing
 
 on:
   pull_request:
     branches:
       - development
     types: [opened, reopened, synchronize, ready_for_review]
+
 jobs:
-  build-android:
+  build-and-test:
     runs-on: ubuntu-latest
     environment: gitrules
 
@@ -21,10 +22,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install --global eas-cli
+          npm install --global eas-cli firebase-tools
           npm install
 
-      - name: Log in to Expo with Token
+      - name: Login to Expo
         run: eas whoami || eas login --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -34,8 +35,24 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-build
-          path: dist/
+      - name: Download built artifacts
+        run: |
+          mkdir -p artifacts
+          eas build:artifacts --platform android --output artifacts/
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Set Firebase Credentials
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase.json
+          gcloud auth activate-service-account --key-file=firebase.json
+          gcloud config set project $(jq -r '.project_id' firebase.json)
+        env:
+          CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
+
+      - name: Upload APK to Firebase App Distribution
+        run: |
+          firebase appdistribution:distribute artifacts/*.apk \
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --groups "qa-team" \
+            --release-notes "CI build from PR"
