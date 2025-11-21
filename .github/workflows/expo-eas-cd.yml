@@ -26,33 +26,39 @@ jobs:
           npm install
 
       - name: Login to Expo
-        run: eas whoami || eas login --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas whoami || eas login --token "$EXPO_TOKEN" --non-interactive
 
       - name: Build Android (APK)
-        run: eas build --platform android --profile preview --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform android --profile preview --non-interactive
 
       - name: Download built artifacts
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p artifacts
           eas build:artifacts --platform android --output artifacts/
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
+      # FIX #1 — Firebase token must NOT expand inside run:
       - name: Set Firebase Credentials
-        run: |
-          echo '${{ secrets.FIREBASE_TOKEN }}' > firebase.json
-          gcloud auth activate-service-account --key-file=firebase.json
-          gcloud config set project $(jq -r '.project_id' firebase.json)
         env:
           CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          echo "$FIREBASE_TOKEN" > firebase.json
+          gcloud auth activate-service-account --key-file=firebase.json
+          gcloud config set project $(jq -r '.project_id' firebase.json)
 
+      # FIX #2 — App ID also must NOT be expanded inside run:
       - name: Upload APK to Firebase App Distribution
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
           firebase appdistribution:distribute artifacts/*.apk \
-            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --app "$FIREBASE_APP_ID" \
             --groups "qa-team" \
             --release-notes "CI build from PR"
