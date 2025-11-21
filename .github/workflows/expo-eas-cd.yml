@@ -14,22 +14,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        run: |
+          echo "Step 1: Checkout repository"
+          git status
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
+        run: |
+          echo "Step 2: Setting up Node.js environment"
+          node -v
+          npm -v
 
       - name: Install dependencies
         run: |
+          echo "Step 3: Installing dependencies"
           npm install --global eas-cli firebase-tools
           npm install
+        continue-on-error: false
 
       - name: Login to Expo
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "Logging into Expo..."
+          echo "Step 4: Logging into Expo..."
           eas whoami || eas login --token "$EXPO_TOKEN" --non-interactive
         continue-on-error: false
 
@@ -37,7 +46,7 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "Building APK for Android..."
+          echo "Step 5: Building APK for Android..."
           eas build --platform android --profile preview --non-interactive
         continue-on-error: false
 
@@ -46,37 +55,50 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "Fetching latest build ID..."
-          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
-          if [ -z "$BUILD_ID" ]; then
-            echo "Error: Unable to retrieve build ID."
+          echo "Step 6: Fetching latest build ID..."
+          BUILD_LIST=$(eas build:list --platform android --limit 1 --json)
+          echo "Build list fetched: $BUILD_LIST"
+
+          # Check if the build list is empty or invalid
+          if [[ -z "$BUILD_LIST" ]]; then
+            echo "Error: No builds found or failed to retrieve builds."
             exit 1
           fi
+
+          # Extract the build ID using jq
+          BUILD_ID=$(echo "$BUILD_LIST" | jq -r '.[0].id')
+
+          # Check if build ID is extracted successfully
+          if [ "$BUILD_ID" == "null" ]; then
+            echo "Error: Unable to extract build ID."
+            exit 1
+          fi
+
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "Latest build ID retrieved successfully: $BUILD_ID"
         continue-on-error: false
 
       - name: Download built artifact
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "Downloading APK artifact..."
+          echo "Step 7: Downloading APK artifact..."
           mkdir -p artifacts
           eas build:download --id ${{ steps.get-build.outputs.build_id }} --path artifacts/
 
-          # Check if APK exists
+          # Check if APK exists after download
           if [ ! -f "artifacts/*.apk" ]; then
             echo "Error: APK file not found after download."
             exit 1
           fi
-          echo "APK downloaded successfully."
-        continue-on-error: false
+          echo "APK downloaded successfully and ready for distribution."
 
       - name: Set Firebase Credentials
         env:
           CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          echo "Setting Firebase credentials..."
+          echo "Step 8: Setting Firebase credentials..."
           echo "$FIREBASE_SERVICE_ACCOUNT" > firebase.json
           gcloud auth activate-service-account --key-file=firebase.json
           gcloud config set project $(jq -r '.project_id' firebase.json)
@@ -86,7 +108,7 @@ jobs:
         env:
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
-          echo "Uploading APK to Firebase App Distribution..."
+          echo "Step 9: Uploading APK to Firebase App Distribution..."
           firebase --version
           firebase appdistribution:distribute artifacts/*.apk \
             --app "$FIREBASE_APP_ID" \
