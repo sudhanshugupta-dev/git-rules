@@ -35,27 +35,35 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: eas build --platform android --profile preview --non-interactive
 
-      - name: Download built artifacts
+      # ✅ FIXED — correct way to find latest build
+      - name: Get latest Android build ID
+        id: get-build
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+
+      # ✅ FIXED — correct command to download APK
+      - name: Download built artifact
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p artifacts
-          eas build:artifacts --platform android --output artifacts/
+          eas build:download --id ${{ steps.get-build.outputs.build_id }} --path artifacts/
 
-      # FIX #1 — Firebase token must NOT expand inside run:
+      # FIXED — secrets safe inside env
       - name: Set Firebase Credentials
         env:
           CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          echo "$FIREBASE_TOKEN" > firebase.json
+          echo "$FIREBASE_SERVICE_ACCOUNT" > firebase.json
           gcloud auth activate-service-account --key-file=firebase.json
           gcloud config set project $(jq -r '.project_id' firebase.json)
 
-      # FIX #2 — App ID also must NOT be expanded inside run:
       - name: Upload APK to Firebase App Distribution
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
           firebase appdistribution:distribute artifacts/*.apk \
