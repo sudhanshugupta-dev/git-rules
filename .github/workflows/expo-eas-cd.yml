@@ -1,13 +1,15 @@
-name: EAS Build + Firebase Distribution
+name: Expo EAS Build + Firebase Testing
 
 on:
   pull_request:
-    branches: [development]
+    branches:
+      - development
     types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  build-android:
+  build-and-test:
     runs-on: ubuntu-latest
+    environment: gitrules
 
     steps:
       - name: Checkout repository
@@ -23,70 +25,72 @@ jobs:
           npm install --global eas-cli firebase-tools
           npm install
 
-      ########################################
-      # EXPO LOGIN USING TOKEN
-      ########################################
-      - name: Login to Expo (Non-interactive)
+      - name: Login to Expo
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
+          echo "Logging into Expo..."
           eas whoami || eas login --token "$EXPO_TOKEN" --non-interactive
+        continue-on-error: false
 
-      ########################################
-      # EAS BUILD
-      ########################################
-      - name: Build Android APK
+      - name: Build Android (APK)
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "Starting EAS build..."
-          eas build --platform android --profile preview --non-interactive --json > build.json
-          echo "Build finished."
+          echo "Building APK for Android..."
+          eas build --platform android --profile preview --non-interactive
+        continue-on-error: false
 
-      ########################################
-      # EXTRACT BUILD ID FROM build.json
-      ########################################
-      - name: Extract Build ID
-        run: |
-          BUILD_ID=$(jq -r '.id' build.json)
-          echo "Build ID: $BUILD_ID"
-          echo "$BUILD_ID" > build_id.txt
-
-      ########################################
-      # DOWNLOAD APK USING NEW EAS SYNTAX
-      ########################################
-      - name: Download APK Artifact
+      - name: Get latest Android build ID
+        id: get-build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          BUILD_ID=$(cat build_id.txt)
-          echo "Downloading APK for build: $BUILD_ID"
-          eas build:download -i "$BUILD_ID" -o app.apk
-          echo "APK downloaded: app.apk"
+          echo "Fetching latest build ID..."
+          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
+          if [ -z "$BUILD_ID" ]; then
+            echo "Error: Unable to retrieve build ID."
+            exit 1
+          fi
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+        continue-on-error: false
 
-      ########################################
-      # FIREBASE CREDENTIALS
-      ########################################
+      - name: Download built artifact
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          echo "Downloading APK artifact..."
+          mkdir -p artifacts
+          eas build:download --id ${{ steps.get-build.outputs.build_id }} --path artifacts/
+
+          # Check if APK exists
+          if [ ! -f "artifacts/*.apk" ]; then
+            echo "Error: APK file not found after download."
+            exit 1
+          fi
+          echo "APK downloaded successfully."
+        continue-on-error: false
+
       - name: Set Firebase Credentials
         env:
-          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase.json
+          echo "Setting Firebase credentials..."
+          echo "$FIREBASE_SERVICE_ACCOUNT" > firebase.json
           gcloud auth activate-service-account --key-file=firebase.json
-          PROJECT_ID=$(jq -r '.project_id' firebase.json)
-          gcloud config set project $PROJECT_ID
+          gcloud config set project $(jq -r '.project_id' firebase.json)
+        continue-on-error: false
 
-      ########################################
-      # UPLOAD TO FIREBASE APP DISTRIBUTION
-      ########################################
       - name: Upload APK to Firebase App Distribution
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
           echo "Uploading APK to Firebase App Distribution..."
-          firebase appdistribution:distribute app.apk \
+          firebase --version
+          firebase appdistribution:distribute artifacts/*.apk \
             --app "$FIREBASE_APP_ID" \
             --groups "qa-team" \
-            --release-notes "CI automated build from PR"
-          echo "Upload completed successfully!"
+            --release-notes "CI build from PR" \
+            --debug
+        continue-on-error: false
