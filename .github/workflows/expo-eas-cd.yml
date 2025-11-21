@@ -67,54 +67,48 @@ jobs:
           set -e
           echo "Starting Android build with profile 'preview'..."
           eas build --platform android --profile preview --non-interactive
-          echo "Build command finished. If this step passed, EAS triggered a build."
+          echo "Build command finished."
 
-      # 6. Get latest Android build ID with full debug
+      # 6. Get latest Android build ID
       - name: Step 6 - Get latest Android build ID
         id: get-build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -e
-          echo "Fetching latest Android build list as JSON..."
-          echo "Running: eas build:list --platform android --limit 5 --json"
+          echo "Fetching latest Android builds as JSON..."
 
           BUILD_LIST_OUTPUT_FILE=build_list.json
           BUILD_LIST_ERROR_FILE=build_list_error.log
 
-          # Run eas build:list and capture stdout and stderr
-          if ! eas build:list --platform android --limit 5 --json > "$BUILD_LIST_OUTPUT_FILE" 2> "$BUILD_LIST_ERROR_FILE"; then
+          if ! eas build:list --platform android --limit 5 --json --non-interactive > "$BUILD_LIST_OUTPUT_FILE" 2> "$BUILD_LIST_ERROR_FILE"; then
             echo "eas build:list command failed."
-            echo "----- Stdout from eas build:list -----"
+            echo "--- Stdout ---"
             cat "$BUILD_LIST_OUTPUT_FILE" || echo "<empty>"
-            echo "----- Stderr from eas build:list -----"
+            echo "--- Stderr ---"
             cat "$BUILD_LIST_ERROR_FILE" || echo "<empty>"
             exit 1
           fi
 
-          echo "eas build:list completed successfully."
-          echo "----- Raw JSON stdout from eas build:list -----"
+          echo "--- Raw JSON Output ---"
           cat "$BUILD_LIST_OUTPUT_FILE" || echo "<empty>"
 
-          # Validate that output is JSON before using jq
+          # Validate JSON
           if ! jq . "$BUILD_LIST_OUTPUT_FILE" > /dev/null 2>&1; then
-            echo "Output is not valid JSON. Full content:"
+            echo "Invalid JSON output:"
             cat "$BUILD_LIST_OUTPUT_FILE"
-            echo "End of invalid JSON output."
             exit 1
           fi
 
-          # Try to read first build id
           BUILD_ID=$(jq -r '.[0].id // empty' "$BUILD_LIST_OUTPUT_FILE")
 
           if [ -z "$BUILD_ID" ]; then
-            echo "Could not find a build id in the JSON."
-            echo "Full parsed JSON for inspection:"
+            echo "No build id found in JSON."
             jq . "$BUILD_LIST_OUTPUT_FILE"
             exit 1
           fi
 
-          echo "Latest build id found: $BUILD_ID"
+          echo "Latest build id: $BUILD_ID"
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
 
       # 7. Download artifact
@@ -127,13 +121,12 @@ jobs:
           mkdir -p artifacts
           eas build:download --id ${{ steps.get-build.outputs.build_id }} --path artifacts/
 
-          echo "Listing artifacts directory:"
-          ls -la artifacts || echo "artifacts directory not found."
+          echo "Listing artifacts:"
+          ls -la artifacts || echo "no artifacts directory"
 
-          # Check for APK file
           APK_COUNT=$(ls artifacts/*.apk 2>/dev/null | wc -l || echo "0")
           if [ "$APK_COUNT" -eq 0 ]; then
-            echo "Error: No .apk files found in artifacts/ after download."
+            echo "Error: No .apk files found."
             exit 1
           fi
 
@@ -147,17 +140,14 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           set -e
-          echo "Writing Firebase service account to firebase.json (not committed to git)."
           echo "$FIREBASE_SERVICE_ACCOUNT" > firebase.json
 
-          echo "Activating service account with gcloud..."
           gcloud auth activate-service-account --key-file=firebase.json
 
           PROJECT_ID=$(jq -r '.project_id' firebase.json)
-          echo "Setting gcloud project to: $PROJECT_ID"
           gcloud config set project "$PROJECT_ID"
 
-      # 9. Upload to Firebase App Distribution
+      # 9. Firebase Upload
       - name: Step 9 - Upload APK to Firebase App Distribution
         env:
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
@@ -166,10 +156,10 @@ jobs:
           echo "Firebase CLI version:"
           firebase --version
 
-          echo "Uploading APKs from artifacts/ to Firebase App Distribution..."
           firebase appdistribution:distribute artifacts/*.apk \
             --app "$FIREBASE_APP_ID" \
             --groups "qa-team" \
             --release-notes "CI build from PR" \
             --debug
+
           echo "Firebase upload completed."
