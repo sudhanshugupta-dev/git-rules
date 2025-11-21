@@ -36,9 +36,24 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -euo pipefail
+
+          # Build the project and get the response in JSON format
           BUILD_JSON=$(eas build --platform android --profile preview --non-interactive --wait --json)
-          BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.id // .[0].id')
-          BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.artifacts.buildUrl // .[0].artifacts.buildUrl')
+
+          # Print BUILD_JSON for debugging
+          echo "$BUILD_JSON"
+
+          # Adjust jq based on JSON structure
+          if echo "$BUILD_JSON" | jq -e 'type == "array"' > /dev/null; then
+            # If it's an array (take first element)
+            BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.[0].id')
+            BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.[0].artifacts.buildUrl')
+          else
+            # If it's an object
+            BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.id')
+            BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.artifacts.buildUrl')
+          fi
+
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
           echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
 
