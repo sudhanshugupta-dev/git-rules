@@ -1,15 +1,13 @@
-name: Expo EAS Build + Firebase Testing
+name: EAS Build + Firebase Distribution
 
 on:
   pull_request:
-    branches:
-      - development
+    branches: [development]
     types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  build-and-test:
+  build-android:
     runs-on: ubuntu-latest
-    environment: gitrules
 
     steps:
       - name: Checkout repository
@@ -25,66 +23,70 @@ jobs:
           npm install --global eas-cli firebase-tools
           npm install
 
-      - name: Login to Expo
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas whoami || eas login --token "$EXPO_TOKEN" --non-interactive
-
-      - name: Build Android (APK)
-        id: build-android
+      ########################################
+      # EXPO LOGIN USING TOKEN
+      ########################################
+      - name: Login to Expo (Non-interactive)
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          set -euo pipefail
+          eas whoami || eas login --token "$EXPO_TOKEN" --non-interactive
 
-          # Build the project and get the response in JSON format
-          BUILD_JSON=$(eas build --platform android --profile preview --non-interactive --wait --json)
-
-          # Print BUILD_JSON for debugging
-          echo "$BUILD_JSON"
-
-          # Adjust jq based on JSON structure
-          if echo "$BUILD_JSON" | jq -e 'type == "array"' > /dev/null; then
-            # If it's an array (take first element)
-            BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.[0].id')
-            BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.[0].artifacts.buildUrl')
-          else
-            # If it's an object
-            BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.id')
-            BUILD_URL=$(echo "$BUILD_JSON" | jq -r '.artifacts.buildUrl')
-          fi
-
-          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
-          echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
-
-      - name: Download built artifact
+      ########################################
+      # EAS BUILD
+      ########################################
+      - name: Build Android APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          eas build:download --id "${{ steps.build-android.outputs.build_id }}" --path artifacts/
+          echo "Starting EAS build..."
+          eas build --platform android --profile preview --non-interactive --json > build.json
+          echo "Build finished."
 
-      # FIXED — secrets safe inside env
+      ########################################
+      # EXTRACT BUILD ID FROM build.json
+      ########################################
+      - name: Extract Build ID
+        run: |
+          BUILD_ID=$(jq -r '.id' build.json)
+          echo "Build ID: $BUILD_ID"
+          echo "$BUILD_ID" > build_id.txt
+
+      ########################################
+      # DOWNLOAD APK USING NEW EAS SYNTAX
+      ########################################
+      - name: Download APK Artifact
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          BUILD_ID=$(cat build_id.txt)
+          echo "Downloading APK for build: $BUILD_ID"
+          eas build:download -i "$BUILD_ID" -o app.apk
+          echo "APK downloaded: app.apk"
+
+      ########################################
+      # FIREBASE CREDENTIALS
+      ########################################
       - name: Set Firebase Credentials
-        id: firebase-creds
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
-          set -euo pipefail
-          CREDS_FILE="${RUNNER_TEMP}/firebase.json"
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$CREDS_FILE"
-          echo "credentials_file=$CREDS_FILE" >> "$GITHUB_OUTPUT"
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase.json
+          gcloud auth activate-service-account --key-file=firebase.json
+          PROJECT_ID=$(jq -r '.project_id' firebase.json)
+          gcloud config set project $PROJECT_ID
 
+      ########################################
+      # UPLOAD TO FIREBASE APP DISTRIBUTION
+      ########################################
       - name: Upload APK to Firebase App Distribution
         env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.firebase-creds.outputs.credentials_file }}
         run: |
-          set -euo pipefail
-          PROJECT_ID=$(jq -r '.project_id' "$GOOGLE_APPLICATION_CREDENTIALS")
-          firebase appdistribution:distribute artifacts/*.apk \
+          echo "Uploading APK to Firebase App Distribution..."
+          firebase appdistribution:distribute app.apk \
             --app "$FIREBASE_APP_ID" \
-            --project "$PROJECT_ID" \
             --groups "qa-team" \
-            --release-notes "CI build from PR"
+            --release-notes "CI automated build from PR"
+          echo "Upload completed successfully!"
