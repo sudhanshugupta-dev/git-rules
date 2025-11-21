@@ -119,19 +119,16 @@ jobs:
           set -e
           echo "Downloading APK for build id: ${{ steps.get-build.outputs.build_id }}"
           mkdir -p artifacts
-          eas build:download --id ${{ steps.get-build.outputs.build_id }} --path artifacts/
+          eas build:download --build-id ${{ steps.get-build.outputs.build_id }} --output artifacts/
 
           echo "Listing artifacts:"
-          ls -la artifacts || echo "no artifacts directory"
-
           APK_COUNT=$(ls artifacts/*.apk 2>/dev/null | wc -l || echo "0")
           if [ "$APK_COUNT" -eq 0 ]; then
-            echo "Error: No .apk files found."
-            exit 1
+          echo "Error: No .apk files found in artifacts/ after download."
+           exit 1
           fi
 
-          echo "APK files found:"
-          ls -la artifacts/*.apk
+          echo "APK downloaded successfully and ready for distribution."
 
       # 8. Firebase credentials
       - name: Step 8 - Set Firebase credentials
