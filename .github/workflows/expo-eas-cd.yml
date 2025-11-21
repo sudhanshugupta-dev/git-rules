@@ -44,11 +44,11 @@ jobs:
 
       - name: Set Firebase Credentials
         run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > firebase.json
+          echo '${{ secrets.FIREBASE_TOKEN }}' > firebase.json
           gcloud auth activate-service-account --key-file=firebase.json
           gcloud config set project $(jq -r '.project_id' firebase.json)
         env:
-          CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
+          CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
 
       - name: Upload APK to Firebase App Distribution
         run: |
