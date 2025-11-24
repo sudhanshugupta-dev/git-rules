@@ -121,7 +121,7 @@ jobs:
           mkdir -p artifacts
 
           echo "Attempt 1: Using --build-id and --path"
-          eas build:download --build-id ${{ steps.get-build.outputs.build_id }} --path artifacts/ || {
+          eas build:download --latest --platform android --output ./builds/app.apk || {
           echo "Attempt 1 failed, trying Attempt 2..."
           eas build:download ${{ steps.get-build.outputs.build_id }} artifacts/
           } 
