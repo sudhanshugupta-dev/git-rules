@@ -112,25 +112,27 @@ jobs:
           echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
 
       # 7. Download artifact
-      - name: Debug EAS CLI version and commands
+      - name: Step 7 - Download built artifact
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          echo "=== Debug Information ==="
-          echo "Node version: $(node --version)"
-          echo "npm version: $(npm --version)"
-          echo "EAS path: $(which eas)"
+          set -e
           echo "EAS version: $(eas --version)"
+          mkdir -p artifacts
 
-          echo "=== Checking build:download help ==="
-          eas build:download --help || echo "Help command failed"
-
-          echo "=== Alternative: Check if eas command exists ==="
-          which eas
-          ls -la $(which eas)
-
-          echo "=== Checking npm global packages ==="
-          npm list -g --depth=0
+          echo "Attempt 1: Using --build-id and --path"
+          eas build:download --build-id ${{ steps.get-build.outputs.build_id }} --path artifacts/ || {
+          echo "Attempt 1 failed, trying Attempt 2..."
+          eas build:download ${{ steps.get-build.outputs.build_id }} artifacts/
+          } 
+          if ls artifacts/*.apk 1> /dev/null 2>&1; then
+            echo "APK downloaded successfully!"
+            ls -la artifacts/*.apk
+          else
+            echo "Error: No APK files found"
+            ls -la artifacts/
+          exit 1
+          fi
 
       - name: Install specific compatible eas-cli version
         run: |
@@ -153,9 +155,9 @@ jobs:
           echo "Downloading APK for build id: ${{ steps.get-build.outputs.build_id }}"
           echo "Attempt 1 Using latest EAS CLI syntax"
           if eas build:download --id ${{ steps.get-build.outputs.build_id }} --output artifacts/; then
-            echo "Download successful with --id --output flags"
+           echo "Download successful with --id --output flags"
           else
-            echo "Attempt 1 failed, trying Attempt 2..."
+           echo "Attempt 1 failed, trying Attempt 2..."
           eas build:download ${{ steps.get-build.outputs.build_id }} artifacts/
           fi
 
