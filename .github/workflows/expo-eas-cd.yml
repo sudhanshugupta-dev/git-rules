@@ -119,7 +119,9 @@ jobs:
           set -e
           echo "Downloading APK for build id: ${{ steps.get-build.outputs.build_id }}"
           mkdir -p artifacts
-          eas build:download --build-id ${{ steps.get-build.outputs.build_id }} --output artifacts/
+          eas build:download \
+          --id ${{ steps.get-build.outputs.build_id }} \
+          --path artifacts/
 
           echo "Listing artifacts:"
           APK_COUNT=$(ls artifacts/*.apk 2>/dev/null | wc -l || echo "0")
@@ -133,7 +135,7 @@ jobs:
       # 8. Firebase credentials
       - name: Step 8 - Set Firebase credentials
         env:
-          CLOUDSDK_CORE_DISABLE_PROMPTS: '1'
+          CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           set -e
