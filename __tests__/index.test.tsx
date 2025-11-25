@@ -50,7 +50,6 @@ describe('App Component', () => {
 
     await waitFor(() => expect(getByTestId('modal-overlay')).toBeTruthy());
 
-    // Simulate backdrop press
     fireEvent(getByTestId('modal-overlay'), 'press');
 
     await waitFor(() => {
