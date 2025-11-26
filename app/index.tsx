@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import {
   SafeAreaView,
+  registerCallableModule,
   View,
   Text,
   TouchableOpacity,
