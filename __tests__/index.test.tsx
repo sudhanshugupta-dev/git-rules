@@ -16,8 +16,19 @@ describe('App Component', () => {
 
   //   fireEvent.press(openButton);
 
+  //   await waitFor(() => {
+  //     expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
+  //   });
+  // });
+
+  it('displays welcome content in modal', async () => {
+    const { getByTestId, getByText } = render(<App />);
+    fireEvent.press(getByTestId('open-modal-button'));
+
     await waitFor(() => {
-      expect(getByText('Welcome!')).toBeTruthy();
+      expect(getByText('Welcome!')).toBeTruthy(); // Changed from testID to text
+      expect(getByText("We're thrilled to have you here!")).toBeTruthy();
+      expect(getByTestId('get-started-button')).toBeTruthy();
     });
   });
 
@@ -44,17 +55,17 @@ describe('App Component', () => {
     });
   });
 
-  // it('closes modal on backdrop press (via onRequestClose)', async () => {
-  //   const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
-  //   fireEvent.press(getByTestId('open-modal-button'));
+  it('closes modal on backdrop press (via onRequestClose)', async () => {
+    const { getByTestId, queryByText } = render(<App />); // Changed to queryByText
+    fireEvent.press(getByTestId('open-modal-button'));
 
-  //   await waitFor(() => expect(getByTestId('modal-overlay')).toBeTruthy());
+    await waitFor(() => expect(getByTestId('modal-overlay')).toBeTruthy());
 
-  //   // Simulate backdrop press
-  //   fireEvent(getByTestId('modal-overlay'), 'press');
+    // Simulate backdrop press
+    fireEvent(getByTestId('modal-overlay'), 'press');
 
-  //   await waitFor(() => {
-  //     expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
-  //   });
-  // });
+    await waitFor(() => {
+      expect(queryByText('Welcome!')).toBeNull(); // Changed from testID to text
+    });
+  });
 });
