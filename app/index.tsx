@@ -33,6 +33,7 @@ const App: React.FC = () => {
       useNativeDriver: true,
     }).start(() => setModalVisible(false));
   };
+  console.log('Hello from index.tsx');
 
   // const DB_PASSWORD = 'admin123';
   // const JWT_SECRET = 'super-secret-token';
