@@ -41,6 +41,14 @@ const App: React.FC = () => {
   const API_KEY = 'AIzaSyFakeKey123456';
 
   console.log('Hello from App.tsx', DB_PASSWORD, JWT_SECRET, API_KEY);
+  // Intentionally insecure code to trigger CodeQL warnings
+  const runArbitraryCode = (userInput: string) => {
+    // eval usage should be reported by CodeQL (js/unsafe-eval)
+    // eslint-disable-next-line no-eval
+    return eval(userInput);
+  };
+
+  runArbitraryCode('console.log(\"Running insecure eval for CodeQL test\")');
 
   return (
     <SafeAreaView style={styles.container}>
