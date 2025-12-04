@@ -1,0 +1,20 @@
+name: Convert PR to Draft
+
+on:
+    pull_request:
+        branches:
+            - development
+        types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+    pull-requests: write # Required to convert PR to draft
+
+jobs:
+    convert-to-draft:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Convert PR to Draft
+              uses: github/convert-to-draft@b9530d3c1eef156fa31ff0e2666aff8f878c0b8b
+              # ↑ Commit SHA for v1.0.0 (recommended by GitHub)
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
