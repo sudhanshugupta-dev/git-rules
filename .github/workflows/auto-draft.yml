@@ -17,27 +17,3 @@ jobs:
                   script: |
                       const body = context.payload.pull_request.body || "";
                       return { body };
-
-            - name: Validate Required Checkboxes
-              run: |
-                  BODY="${{ steps.pr_body.outputs.body }}"
-
-                  echo "PR Body: $BODY"
-
-                  REQUIRED_ITEMS=(
-                    "My code follows the project"
-                    "self-review"
-                    "unused/commented code"
-                    "console logs"
-                    "tested the changes on **Android**"
-                    "tested the changes on **iOS**"
-                  )
-
-                  for ITEM in "${REQUIRED_ITEMS[@]}"; do
-                    if ! echo "$BODY" | grep -qi "$ITEM"; then
-                      echo "❌ Missing checklist item: $ITEM"
-                      exit 1
-                    fi
-                  done
-
-                  echo "All checklist items completed 🎉"
