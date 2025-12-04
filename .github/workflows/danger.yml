@@ -1,27 +1,30 @@
 name: Danger JS
 
 on:
-  pull_request:
+    pull_request:
+        branches:
+            - development
+        types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  danger:
-    runs-on: ubuntu-latest
+    danger:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
 
-      - name: Install dependencies
-        run: npm install
+            - name: Install dependencies
+              run: npm install
 
-      - name: Run Danger
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx danger ci
+            - name: Run Danger
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: npx danger ci
