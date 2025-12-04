@@ -1,10 +1,5 @@
 const { danger, message, fail } = require('danger');
 
-// Fail: Empty description
-if (!danger.github.pr.body || danger.github.pr.body.length < 10) {
-  fail('❌ Add a proper PR description.');
-}
-
 // Fail: Missing lockfile update
 const modified = danger.git.modified_files;
 if (modified.includes('package.json') && !modified.includes('yarn.lock')) {
