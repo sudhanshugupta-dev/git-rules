@@ -39,7 +39,7 @@ Closes: #
 ### 🔐 Security
 
 - [ ] No sensitive data (keys/tokens) added
-- [ ] API endpoints handled safely
+- API endpoints handled safely
 
 ---
 
