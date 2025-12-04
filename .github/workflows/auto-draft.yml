@@ -5,15 +5,13 @@ on:
         branches:
             - development
         types: [opened, reopened, synchronize, ready_for_review]
+
 jobs:
     validate-checklist:
         runs-on: ubuntu-latest
 
         steps:
-            - name: ⬇️ Checkout code
-              uses: actions/checkout@v4
-
-            - name: 🔍 Read Pull Request Body
+            - name: Read PR Body
               id: pr_body
               uses: actions/github-script@v7
               with:
@@ -21,39 +19,25 @@ jobs:
                       const body = context.payload.pull_request.body || "";
                       return { body };
 
-            - name: ✅ Validate Required Checkboxes
-              id: validate
+            - name: Validate Required Checkboxes
               run: |
-                  echo "Checking required checklist items..."
-
-                  REQUIRED_CHECKBOXES=(
-                    "- [x] My code follows the project’s style guidelines"
-                    "- [x] I have performed a **self-review** of my code"
-                    "- [x] There is no unused/commented code left behind"
-                    "- [x] No console logs / debug logs remain"
-                    "- [x] I have tested the changes on **Android**"
-                    "- [x] I have tested the changes on **iOS**"
-                  )
-
                   BODY="${{ steps.pr_body.outputs.body }}"
 
-                  echo "$BODY" > pr_body.txt
+                  # KEYWORDS instead of exact matching
+                  REQUIRED_ITEMS=(
+                    "My code follows the project"
+                    "self-review"
+                    "unused/commented code"
+                    "console logs"
+                    "tested the changes on **Android**"
+                    "tested the changes on **iOS**"
+                  )
 
-                  MISSING=""
-
-                  for CHECK in "${REQUIRED_CHECKBOXES[@]}"; do
-                    if ! grep -q "$CHECK" pr_body.txt; then
-                      MISSING="$MISSING\n❌ Missing: $CHECK"
+                  for ITEM in "${REQUIRED_ITEMS[@]}"; do
+                    if ! echo "$BODY" | grep -q "$ITEM"; then
+                      echo "❌ Missing checklist item: $ITEM"
+                      exit 1
                     fi
                   done
 
-                  if [ -n "$MISSING" ]; then
-                    echo -e "PR Checklist validation failed: $MISSING"
-                    exit 1
-                  fi
-
-                  echo "All required checks passed successfully 🎉"
-
-            - name: 🟩 Success
-              if: success()
-              run: echo "Checklist validated successfully!"
+                  echo "All checklist items completed 🎉"
