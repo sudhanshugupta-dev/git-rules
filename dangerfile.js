@@ -7,7 +7,7 @@ if (modified.includes('package.json') && !modified.includes('yarn.lock')) {
 }
 
 // Fail: Too many lines of code
-if (danger.github.pr.additions > 700) {
+if (danger.github.pr.additions < 700) {
   fail('❌ PR is too large. Split it into smaller parts.');
 }
 
