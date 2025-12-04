@@ -54,6 +54,7 @@
     "@types/react": "~19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
+    "danger": "^13.0.5",
     "eslint": "^9.39.1",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.8",
