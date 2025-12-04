@@ -11,11 +11,20 @@ import {
   Dimensions,
 } from 'react-native';
 
+// dangerfile.js
+import { danger, warn, message } from 'danger';
+
 const { width } = Dimensions.get('window');
 
 const App: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const scaleValue = new Animated.Value(0);
+
+  if (!danger.github.pr.body || danger.github.pr.body.length < 10) {
+    warn('Please add a proper PR description.');
+  }
+
+  message('Danger.js ran successfully!');
 
   const openModal = () => {
     setModalVisible(true);
