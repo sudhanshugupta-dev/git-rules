@@ -6,6 +6,12 @@ on:
             - development
         types: [opened, reopened, synchronize, ready_for_review]
 
+permissions:
+    contents: write
+    pull-requests: write
+    checks: write
+    statuses: write
+
 jobs:
     danger:
         runs-on: ubuntu-latest
