@@ -23,7 +23,13 @@ jobs:
               run: |
                   BODY="${{ steps.pr_body.outputs.body }}"
 
-                  # KEYWORDS instead of exact matching
+                  echo "PR Body: $BODY"
+
+                  if [ -z "$BODY" ]; then
+                    echo "❌ Pull Request has no description. Please fill the PR template."
+                    exit 1
+                  fi
+
                   REQUIRED_ITEMS=(
                     "My code follows the project"
                     "self-review"
@@ -34,7 +40,7 @@ jobs:
                   )
 
                   for ITEM in "${REQUIRED_ITEMS[@]}"; do
-                    if ! echo "$BODY" | grep -q "$ITEM"; then
+                    if ! echo "$BODY" | grep -qi "$ITEM"; then
                       echo "❌ Missing checklist item: $ITEM"
                       exit 1
                     fi
