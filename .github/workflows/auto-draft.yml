@@ -24,11 +24,6 @@ jobs:
 
                   echo "PR Body: $BODY"
 
-                  if [ -z "$BODY" ]; then
-                    echo "❌ Pull Request has no description. Please fill the PR template."
-                    exit 1
-                  fi
-
                   REQUIRED_ITEMS=(
                     "My code follows the project"
                     "self-review"
