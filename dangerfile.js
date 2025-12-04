@@ -1,4 +1,4 @@
-const { danger, message, fail } = require('danger');
+const { danger, message } = require('danger');
 
 // Fail: Missing lockfile update
 // const modified = danger.git.modified_files;
