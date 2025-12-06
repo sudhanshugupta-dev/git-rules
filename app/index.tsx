@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import {
   SafeAreaView,
+  registerCallableModule,
   View,
   Text,
   TouchableOpacity,
@@ -42,12 +43,21 @@ const App: React.FC = () => {
       useNativeDriver: true,
     }).start(() => setModalVisible(false));
   };
+  console.log('Hello from index.tsx');
 
-  // const DB_PASSWORD = 'admin123';
-  // const JWT_SECRET = 'super-secret-token';
-  // const API_KEY = 'AIzaSyFakeKey123456';
+  const DB_PASSWORD = 'admin123';
+  const JWT_SECRET = 'super-secret-token';
+  const API_KEY = 'AIzaSyFakeKey123456';
 
-  // console.log('Hello from App.tsx', DB_PASSWORD, JWT_SECRET, API_KEY);
+  console.log('Hello from App.tsx', DB_PASSWORD, JWT_SECRET, API_KEY);
+  // Intentionally insecure code to trigger CodeQL warnings
+  const runArbitraryCode = (userInput: string) => {
+    // eval usage should be reported by CodeQL (js/unsafe-eval)
+    // eslint-disable-next-line no-eval
+    return eval(userInput);
+  };
+
+  runArbitraryCode('console.log(\"Running insecure eval for CodeQL test\")');
 
   return (
     <SafeAreaView style={styles.container}>
