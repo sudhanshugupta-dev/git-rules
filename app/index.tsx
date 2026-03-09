@@ -82,7 +82,7 @@ const App: React.FC = () => {
               We are thrilled to have you here!
             </Text>
             <Text style={styles.welcomeMessage}>
-              Explore amazing features{'\n'}and enjoy a seamless experience.
+              Explore amazing features{'\n'}and enjoy a seamless efdfdxperience.
             </Text>
 
             <TouchableOpacity
