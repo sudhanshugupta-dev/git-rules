@@ -241,13 +241,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # 5 Make Gradle executable
-      - name: Step 5 - Grant execute permission to Gradle
-        run: chmod +x gradlew
+      # # 5 Make Gradle executable
+      # - name: Step 5 - Make Gradle executable
+      #   run: chmod +x ./gradlew
 
-      # 6 Build APK using Gradle
-      - name: Step 6 - Build Android Release APK
-        run: ./gradlew assembleRelease
+      # # 6 Build APK using Gradle
+      # - name: Step 6 - Build Android Release APK
+      #   run: ./gradlew assembleRelease
+
+      - name: STEP 5 - Build Android Release
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
 
       # 7 Verify APK
       - name: Step 7 - Verify generated APK
