@@ -257,7 +257,8 @@ jobs:
       - name: STEP 5 - Build Android Release
         run: |
           chmod +x android/gradlew
-          ./android/gradlew assembleRelease
+          cd android
+          ./gradlew assembleRelease
 
       # 7 Verify APK
       - name: Step 7 - Verify generated APK
