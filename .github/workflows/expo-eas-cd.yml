@@ -251,7 +251,6 @@ jobs:
 
       - name: STEP 5 - Build Android Release
         run: |
-          cd android
           chmod +x gradlew
           ./gradlew assembleRelease
 
