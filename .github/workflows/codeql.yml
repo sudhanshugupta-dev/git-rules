@@ -1,7 +1,13 @@
-name: 'codeql_analysis'
+name: CodeQL Analysis
 
 on:
-  workflow_call:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [development]
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
 
 jobs:
   analyze:
@@ -19,10 +25,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+          languages: javascript, typescript
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
