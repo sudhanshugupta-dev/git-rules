@@ -241,6 +241,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: (got ISSue)Debug folder structure
+        run: |
+          pwd
+          ls -R
+
       # # 5 Make Gradle executable
       # - name: Step 5 - Make Gradle executable
       #   run: chmod +x ./gradlew
